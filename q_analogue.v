@@ -28,11 +28,10 @@ Qed.
 (* q-derivative *)
 Definition Dq f := dq f // dq id.
 
-Fixpoint hoDq n f := if n is m.+1 then Dq (hoDq m f) else f.
-(*  match n with
+Fixpoint hoDq n f := match n with
   | 0 => f
   | n.+1 => Dq (hoDq n f)
-  end. *)
+  end.
 
 (* q-derivative for const is 0 *)
 Lemma Dq_const x c : Dq (fun x => c) x = 0.
@@ -245,8 +244,10 @@ Proof.
 Qed.
 
 (* q-analogue of polynomial for nat *)
-Fixpoint qbinom_pos a n x :=
-  if n is m.+1 then (qbinom_pos a m x) * (x - q ^ m * a) else 1.
+Fixpoint qbinom_pos a n x := match n with
+  | 0 => 1
+  | n.+1 => (qbinom_pos a n x) * (x - q ^ n * a)
+  end.
 
 Lemma qbinom_pos_head a n x:
    qbinom_pos a n.+1 x =
@@ -374,15 +375,12 @@ Definition qbinom a n x :=
   | Posz n0 => qbinom_pos a n0 x
   | Negz n0 => qbinom_neg a n0.+1 x
   end.
-(*  if n is Posz m then qbinom_pos a m x
-  else qbinom_neg a m.+1 x. *)
 
 Definition qbinom_denom a n x :=
-  if n is Negz m then qbinom_pos (q ^ Negz m * a) m.+1 x else 1.
-(*  match n with
+ match n with
   | Posz n0 => 1
   | Negz n0 => qbinom_pos (q ^ Negz n0 * a) n0.+1 x
-  end. *)
+  end.
 
 Lemma Dq_qbinom_int_to_neg a n x :
   Dq (qbinom a (Negz n)) x = Dq (qbinom_neg a (n + 1)) x.
@@ -627,12 +625,10 @@ Proof.
     by rewrite Negz_addK addn1.
 Qed.
 
-Fixpoint qfact n :=
-  if n is m.+1 then qfact m * qnat m.+1 else 1.
-(*  match n with
+Fixpoint qfact n := match n with
   | 0 => 1
   | n.+1 => qfact n * qnat n.+1
-  end. *)
+  end.
 
 Lemma qfact_nat_non0 n : qfact n.+1 != 0 -> qnat n.+1 != 0.
 Proof.
@@ -751,12 +747,10 @@ Proof.
   by apply mulf_neq0.
 Qed.
 
-Fixpoint hoD {A} D n (f : A) :=
-  if n is m.+1 then D (hoD D m f) else f.
-(*  match n with
+Fixpoint hoD {A} D n (f : A) := match n with
   | 0 => f
   | n.+1 => D (hoD D n f)
-  end. *)
+  end.
 
 Notation "D \^ n" := (hoD D n) (at level 49).
 
@@ -812,11 +806,10 @@ Proof.
 Qed.
 
 Definition isfderiv D (P : nat -> {poly R}) := forall n,
-  if n is m.+1 then (D (P m.+1)) = P m else (D (P n)) = 0.
-(*  match n with
+  match n with
   | 0 => (D (P n)) = 0
   | n.+1 => (D (P n.+1)) = P n
-  end. *)
+  end.
 
 Lemma poly_basis n (P : nat -> {poly R}) (f : {poly R}) :
   (forall m, size (P m) = m.+1) ->
@@ -1368,12 +1361,10 @@ Proof.
     by rewrite mul_polyC scale1r scale_varXn -scalerDl -qnat_catn.
 Qed.
 
-Fixpoint qbinom_pos_poly a n :=
-  if n is m.+1 then (qbinom_pos_poly a m) * ('X - (q ^ m * a)%:P) else 1.
-(*  match n with
+Fixpoint qbinom_pos_poly a n := match n with
   | 0 => 1
   | n.+1 => (qbinom_pos_poly a n) * ('X - (q ^ n * a)%:P)
-  end. *)
+  end.
 
 Lemma qbinom_size a n : size (qbinom_pos_poly a n) = n.+1.
 Proof.
