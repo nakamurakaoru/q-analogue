@@ -6,37 +6,12 @@ Local Open Scope ring_scope.
 
 Variable (R : rcfType) (q : R).
 Hypothesis Hq : q - 1 != 0.
-Axiom funext : forall A B (f g : A -> B), f =1 g -> f = g.
 
 Notation "f ** g" := (fun x => f x * g x) (at level 40).
 Notation "f // g" := (fun x => f x / g x) (at level 40).
 Notation "a */ f" := (fun x => a * (f x)) (at level 40).
 
-(*Lemma lim_add a b c (f g : R -> R) : cvg a b f -> cvg a c g ->
-  cvg a (b + c) (f \+ g).
-Proof.
-  rewrite /cvg.
-  move=> fa_b ga_c e He0.
-  move:(fa_b (e/2%:R)) => [].
-    apply Num.Theory.divr_gt0 => //.
-    by apply Num.Theory.ltr0n.
-  move=> d1 fa_b'.
-  move:(ga_c (e/2%:R)) => [].
-    apply Num.Theory.divr_gt0 => //.
-    by apply Num.Theory.ltr0n.
-  move=> d2 ga_c'.
-  exists (Num.min d1 d2).
-  move=> x Hd.
-Admitted.*)
-
 (* tools *)
-(* 関数の積の交換 *)
-Lemma mulfC (f g : R -> R) : f ** g = g ** f.
-Proof.
-  apply funext => x.
-  by rewrite mulrC.
-Qed.
-
 (* -の分配則*)
 Lemma negdistr {V : zmodType} (a b : V) : - (a + b) = - a - b.
 Proof.
@@ -112,8 +87,8 @@ Qed.
 Lemma mulrC23 {V : comRingType} (a b c d : V) :
   a * b * c * d = a * c * b * d.
 Proof.
-f_equal.
-by rewrite -!mulrA [b * c]mulrC.
+  f_equal.
+  by rewrite -!mulrA [b * c]mulrC.
 Qed.
 
 Lemma exp0rz' n : (GRing.zero R) ^ (Posz n.+1) = 0.
@@ -372,16 +347,16 @@ Proof. by move=> ->. Qed.
 
 Lemma size_N0_lt (p : {poly R}) : (size p == 0%N) = false -> (0 < size p)%N.
 Proof.
-move=> Hsize.
-rewrite ltn_neqAle.
-apply /andP; split => //.
-move: Hsize.
-by rewrite eq_sym => ->.
+  move=> Hsize.
+  rewrite ltn_neqAle.
+  apply /andP; split => //.
+  move: Hsize.
+  by rewrite eq_sym => ->.
 Qed.
 
 Lemma polyX_div n : (polyX R) ^ n.+1 %/ (polyX R) = (polyX R) ^ n.
 Proof.
-by rewrite exprSzr mulpK ?polyX_eq0.
+  by rewrite exprSzr mulpK ?polyX_eq0.
 Qed.
 
 Lemma scalerAr' c d (p : {poly R}) j : c * (d *: p)`_j = d * (c * p`_j).
@@ -394,8 +369,8 @@ Qed.
 Lemma scale_div c d (p p' : {poly R}) : d != 0 ->
   (c *: p) %/ (d *: p') = (c / d) *: (p %/ p').
 Proof.
-move=> Hd.
-by rewrite divpZl divpZr // scalerA.
+  move=> Hd.
+  by rewrite divpZl divpZr // scalerA.
 Qed.
 
 (* not used *)

@@ -180,7 +180,9 @@ Lemma Dq_prod' f g x : x != 0 ->
    Dq (f ** g) x = (f x) * Dq g x + g (q * x) * Dq f x.
 Proof.
   move=> Hx.
-  by rewrite (mulfC _ f g) Dq_prod // addrC.
+  have -> : Dq (f ** g) x = Dq (g ** f) x.
+    by rewrite /Dq /dq (mulrC (f (q * x))) (mulrC (f x)).
+  by rewrite Dq_prod // addrC.
 Qed.
 
 (* reduce fraction in q-derivative *)
