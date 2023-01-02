@@ -109,55 +109,6 @@ Proof.
   by apply /Num.Theory.mulr_egt1 /IH.
 Qed.
 
-(* Lemma mul_norm (x y : R) : `|x * y| = `|x| * `|y|.
-Proof.
-  case Hx0 : (x != 0).
-  - case Hy0 : (y != 0).
-    + case Hx : (0 <= x).
-      - case Hy : (0 <= y).
-        + rewrite !Num.Theory.ger0_norm //.
-          by apply Num.Theory.mulr_ge0.
-        + rewrite (@Num.Theory.ger0_norm _ x) //.
-          rewrite !Num.Theory.ltr0_norm //.
-              by rewrite mulrN.
-            by rewrite mc_1_10.Num.Theory.ltrNge Hy.
-          rewrite Num.Theory.pmulr_rlt0.
-            by rewrite mc_1_10.Num.Theory.ltrNge Hy.
-          rewrite  mc_1_10.Num.Theory.ltr_def //.
-          by apply /andP; split.
-      - case Hy : (0 <= y).
-        + rewrite (@Num.Theory.ger0_norm _ y) //.
-          rewrite !Num.Theory.ltr0_norm //.
-              by rewrite mulNr.
-            by rewrite mc_1_10.Num.Theory.ltrNge Hx.
-          rewrite Num.Theory.pmulr_llt0.
-            by rewrite mc_1_10.Num.Theory.ltrNge Hx.
-          rewrite  mc_1_10.Num.Theory.ltr_def //.
-          by apply /andP; split.
-        + rewrite Num.Theory.ger0_norm.
-            rewrite !Num.Theory.ltr0_norm //.
-                by rewrite opp_oppE'.
-              by rewrite mc_1_10.Num.Theory.ltrNge Hy.
-            by rewrite mc_1_10.Num.Theory.ltrNge Hx.
-          rewrite mc_1_10.Num.Theory.ltrW // Num.Theory.nmulr_lgt0.
-            by rewrite mc_1_10.Num.Theory.ltrNge Hx.
-          by rewrite mc_1_10.Num.Theory.ltrNge Hy.
-    + move: Hy0.
-      move/eqP => ->.
-      by rewrite mulr0 !mc_1_10.Num.Theory.normr0 mulr0.
-  - move: Hx0.
-    move/eqP => ->.
-    by rewrite mul0r !mc_1_10.Num.Theory.normr0 mul0r.
-Qed. *)
-
-(* Lemma exp_lt1 (x : R) (n : nat) : `|x| < 1 -> `|x ^ n.+1| < 1.
-Proof.
-  move=> Hx.
-  elim: n => [|n IH] //=.
-  rewrite exprSz mul_norm.
-  by apply Num.Theory.mulr_ilt1.
-Qed. *)
-
 (* R上の　add cancel *)
 Lemma addrK' {V : zmodType} (a : V) : a - a = 0.
 Proof. by rewrite -{1}(add0r a) addrK. Qed.
@@ -240,18 +191,6 @@ Proof. by rewrite -mulrA [y^-1 / z] mulrC mulrA. Qed.
 Lemma sumW {V : zmodType} n (F : nat -> V) :
   \sum_(i < n) F i = \sum_(0 <= i < n) F i.
 Proof. by rewrite big_mkord. Qed.
-
-(* Lemma sum_shift m n (F : nat -> R) :
-  \sum_(m <= i < m + n.+1) F i = \sum_(0 <= i < n.+1) F (i + m)%N.
-Proof.
-  elim: n => [|n IH].
-  - by rewrite addn1 !big_nat1 add0n.
-  - rewrite (@big_cat_nat R _ _ (m + n.+1) m (m + n.+2)) //=.
-        rewrite (@big_cat_nat R _ _ n.+1 0 n.+2) //=.
-        by rewrite [(m + n.+2)%N] addnS IH !big_nat1 addnC.
-      by apply leq_addr.
-    by rewrite leq_add2l.
-Qed. *)
 
 Lemma sum_add {V : zmodType} n (F G : nat -> V) :
   \sum_(0 <= i < n) (F i) + \sum_(0 <= i < n) (G i) =
@@ -342,9 +281,6 @@ Proof.
   by rewrite mulr0 scale0r.
 Qed.
 
-Lemma poly_happly p p' (x : R) : p = p' -> p.[x] = p'.[x].
-Proof. by move=> ->. Qed.
-
 Lemma size_N0_lt (p : {poly R}) : (size p == 0%N) = false -> (0 < size p)%N.
 Proof.
   move=> Hsize.
@@ -352,6 +288,14 @@ Proof.
   apply /andP; split => //.
   move: Hsize.
   by rewrite eq_sym => ->.
+Qed.
+
+Lemma scale_constpoly (a c : R) : a *: c%:P = (a * c)%:P.
+Proof.
+  apply polyP => i.
+  rewrite coefZ !coefC.
+  case : (i == 0%N) => //.
+  by rewrite mulr0.
 Qed.
 
 Lemma polyX_div n : (polyX R) ^ n.+1 %/ (polyX R) = (polyX R) ^ n.
@@ -372,69 +316,5 @@ Proof.
   move=> Hd.
   by rewrite divpZl divpZr // scalerA.
 Qed.
-
-(* not used *)
-
-(*Lemma qpoly_ex a (n : nat) x : qpoly a (- 1) x = 1 / (x - q ^ (- 1) * a) .
-Proof.
-  move=> /=.
-  rewrite /qpoly_neg /=.
-  rewrite expr0z !mul1r.
-  rewrite (_ : Negz 1 + 1 = - 1) //.
-Qed.*)
-
-(* Lemma sum_onefderiv_pos j n c D P : islinear D -> isfderiv D P ->
-  (j <= n)%N -> 
-  \sum_(j.+1 <= i < n.+1) c i *: D (P (i - j)%N) =
-  \sum_(j.+1 <= i < n.+1) c i *: P (i - j.+1)%N.
-Proof.
-  move=> HlD Hd Hjn.
-  under eq_big_nat => i /andP [Hi HI'].
-    have -> : (i - j)%N = (i - j.+1)%N.+1.
-      by rewrite subnS prednK // subn_gt0.
-    rewrite (Hd (i - j.+1).+1).
-  over. done.
-Qed. *)
-
-(* Lemma sum_fderiv_pos j n D P c : islinear D -> isfderiv D P ->
-  (j <= n)%N ->
-  \sum_(j <= i < n.+1) c i *: (D \^ j) (P i) =
-  \sum_(j <= i < n.+1) c i *: P (i - j)%N.
-Proof.
-  move=> HlD Hd.
-  elim:j => [|j IH] Hjn.
-  - elim: n Hjn => [|n IH'] Hjn.
-    + by rewrite !big_nat1 subn0.
-    + rewrite (@big_cat_nat _ _ _ n.+1) //= big_nat1 IH' //.
-      by rewrite [RHS] (@big_cat_nat _ _ _ n.+1) //= big_nat1 subn0.
-  - have Hjn' : (j < n.+1)%N.
-      by apply leqW.
-    move: (IH (ltnW Hjn)).
-    rewrite (@big_cat_nat _ _ _ j.+1) //= big_nat1.
-    rewrite nthisfderiv_pos // subnn.
-    rewrite (@big_cat_nat _ _ _ j.+1 j) //= big_nat1 subnn.
-    move /(same_addl (c j *: P 0%N)) => IH'.
-    rewrite -linear_distr' // IH' linear_distr' //.
-    by apply sum_onefderiv_pos.
-Qed. *)
-
-(* Lemma sum_isfderiv_0 n c D (P : nat -> {poly R}) :
-  islinear D -> isfderiv D P ->
-  \sum_(0 <= i < n.+1) c i *: (D \^ n.+1) (P i) = 0.
-Proof.
-  elim: n => [/= |n IH] HlD Hd.
-  - rewrite big_nat1.
-    have -> : D (P 0%N) = 0.
-      by apply (Hd 0%N).
-    by rewrite scaler0.
-  - rewrite (@big_cat_nat _ _ _ n.+1) //.
-    rewrite big_nat1 (lock n.+1) /= -lock.
-    rewrite -linear_distr // IH //.
-    rewrite linear0 // add0r.
-    rewrite nthisfderiv_pos // subnn.
-    have -> : D (P 0%N) = 0.
-      by apply (Hd 0%N).
-    by rewrite scaler0.
-Qed. *)
 
 End q_tools.

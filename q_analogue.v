@@ -7,7 +7,6 @@ Local Open Scope ring_scope.
 Section q_analogue.
 Variable (R : rcfType) (q : R).
 Hypothesis Hq : q - 1 != 0.
-Axiom funext : forall A B (f g : A -> B), f =1 g -> f = g.
 
 Notation "f ** g" := (fun x => f x * g x) (at level 40).
 Notation "f // g" := (fun x => f x / g x) (at level 40).
@@ -105,52 +104,6 @@ Proof.
   - by rewrite qnat1 qnat0 add0r expr0z.
   - by rewrite (qnat_cat n) ?subSnn ?qnat1 ?mulr1.
 Qed.
-
-(* Lemma qnat_ispos n : -1 < q -> qnat n.+1 > 0.
-Proof.
-  move=> Hq1.
-  rewrite /qnat.
-  case H : (q - 1 >= 0).
-  - have H' : 0 < q - 1.
-      rewrite Num.Theory.lt0r.
-      by apply /andP.
-    apply Num.Theory.divr_gt0 => //.
-    rewrite Num.Theory.subr_gt0.
-    apply exp_gt1.
-    by rewrite -Num.Theory.subr_gt0.
-  - have H' : (0 < 1 - q).
-      by rewrite -opprB Num.Theory.oppr_gt0
-              mc_1_10.Num.Theory.ltrNge H.
-    rewrite -opp_frac !opprB.
-    apply Num.Theory.divr_gt0 => //.
-    rewrite Num.Theory.subr_gt0.
-    apply /Num.Theory.ltr_normlW /exp_lt1.
-    rewrite Num.Theory.ltr_norml.
-    apply /andP; split => //.
-    by rewrite -Num.Theory.subr_gt0.
-Qed. *)
-
-(* Lemma qnat_non0 n : qnat n.+1 != 0.
-Proof. by apply /Num.Theory.lt0r_neq0 /qnat_ispos. Qed. *)
-
-(*Lemma prod_qbinom_pos a n x :
-  qbinom_pos a n.+1 x = \prod_(0 <= i < n.+1) (x -  q ^ i * a).
-Proof.
-  elim: n => [/=|n IH].
-  - by rewrite big_nat1 mul1r.
-  - rewrite (@big_cat_nat _ _ _ n.+1) //=.
-    by rewrite big_nat1 -IH.
-Qed.*)
-
-(* Lemma lim_qnat n : forall e : R, e > 0 ->
-  exists d, `|q - 1| < d -> `|n%:R - (qnat n)| < e.
-Proof.
-  move=> e He.
-  destruct n.
-  - eexists => _.
-    by rewrite qnat0 addrK' Num.Theory.normr0.
-  - exists (e / n%:R).
-Admitted. *)
 
 (* q-derivative of x ^ n *)
 Lemma Dq_pow n x :
@@ -292,15 +245,6 @@ Proof.
         by rewrite !subn1 /= half_add.
       by rewrite -mulrA -(exprSzr a n.+1).
 Qed.
-
-(*Lemma prod_qbinom_pos a n x :
-  qbinom_pos a n.+1 x = \prod_(0 <= i < n.+1) (x -  q ^ i * a).
-Proof.
-  elim: n => [/=|n IH].
-  - by rewrite big_nat1 mul1r.
-  - rewrite (@big_cat_nat _ _ _ n.+1) //=.
-    by rewrite big_nat1 -IH.
-Qed.*)
 
 (* q-derivative of q-polynomial for nat *)
 Theorem Dq_qbinom_pos a n x : x != 0 ->
@@ -1058,14 +1002,6 @@ Proof.
   by rewrite mulrA -scale_var_prodX -mul_polyC -mulrDl -{1}scale_varC -scale_var_add.
 Qed.
 
-Lemma scale_constpoly (a c : R) : a *: c%:P = (a * c)%:P.
-Proof.
-  apply polyP => i.
-  rewrite coefZ !coefC.
-  case : (i == 0%N) => //.
-  by rewrite mulr0.
-Qed.
-
 Lemma scale_varX a : scale_var ('X - a%:P) = q *: 'X - a%:P.
 Proof.
   rewrite /scale_var poly_def size_XsubC.
@@ -1473,7 +1409,7 @@ Proof.
   rewrite sum_poly_div.
   under eq_bigr do rewrite -hornerZ.
   rewrite -hornersumD.
-  apply poly_happly.
+  f_equal.
   under eq_bigr do rewrite -hoDqp'_DqE //.
   by apply q_Taylorp.
 Qed.
@@ -1566,8 +1502,7 @@ Proof.
   under eq_big_nat => i /andP [_ Hi].
     rewrite hoDqp'_qbinom0 //.
     rewrite [(qbinom_pos_poly 0 i / (qfact i)%:P)]mulrC.
-    rewrite polyCV.
-    rewrite scalerAl scale_constpoly.
+    rewrite polyCV scalerAl scale_constpoly.
     have -> : qbicoef n i * qfact i * q ^+ ((n - i) * (n - i - 1))./2 *
               a ^+ (n - i) / qfact i =
               qbicoef n i * q ^+ ((n - i) * (n - i - 1))./2 * a ^+ (n - i).
