@@ -1,5 +1,6 @@
 From mathcomp Require Import all_ssreflect all_algebra.
 Import GRing.
+Import FracField.
 Require Import q_tools.
 
 Local Open Scope ring_scope.
@@ -1103,6 +1104,26 @@ Definition Dqp p := dqp p %/ dqp 'X.
 
 Lemma Dqp_ok p : dqp 'X %| dqp p.
 Proof. by rewrite dqpXE dvdpZl ?dqppXE ?dvdp_mulIl. Qed.
+
+Local Notation tofrac := (@tofrac [idomainType of {poly R}]).
+Local Notation "x %:F" := (tofrac x).
+
+Theorem Dq_f_ok_frac p : (dqp p)%:F / (dqp 'X)%:F = (Dqp p)%:F.
+Proof.
+  have Hn0 : (dqp 'X)%:F != 0.
+    rewrite tofrac_eq dqpXE lreg_polyZ_eq0 ?polyX_eq0 //.
+    rewrite /(GRing.lreg) /(injective) => x y.
+    rewrite mulrC (mulrC (q - 1)).
+    by apply same_prod.
+  apply (frac_same_prod _ _ _ (dqp 'X)%:F) => //.
+  rewrite [LHS]mulC mulA (mulC ((dqp 'X))%:F) -mulA.
+  rewrite (mulC ((dqp 'X))%:F) mulV_l // mulC mul1_l.
+  rewrite /(Dqp) -tofracM.
+  apply /eqP.
+  rewrite tofrac_eq.
+  apply /eqP.
+  by rewrite divpK ?Dqp_ok.
+Qed.
 
 Lemma DqpE' p : Dqp p = dqp p %/ ((q - 1) *: 'X).
 Proof. by rewrite /Dqp dqpXE. Qed.

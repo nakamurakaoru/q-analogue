@@ -1,5 +1,6 @@
 From mathcomp Require Import all_ssreflect all_algebra.
 Import GRing.
+Import FracField.
 
 Section q_tools.
 Local Open Scope ring_scope.
@@ -317,4 +318,14 @@ Proof.
   by rewrite divpZl divpZr // scalerA.
 Qed.
 
+Local Notation tofrac := (@tofrac [idomainType of {poly R}]).
+Local Notation "x %:F" := (tofrac x).
+
+Lemma frac_same_prod (a b c : {fraction [idomainType of {poly R}]}) :
+  c != 0 -> a * c = b * c -> a = b.
+Proof.
+  move=> Hc.
+  by rewrite -{2}(mulr1 a) -{2}(mulr1 b)
+     -(@divff _ c) // !mulrA => ->.
+Qed.
 End q_tools.
