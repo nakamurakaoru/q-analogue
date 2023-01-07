@@ -894,10 +894,10 @@ Proof.
   by rewrite coef.
 Qed.
 
-Definition polyderiv (D : (R -> R) -> (R -> R)) (p : {poly R}) :=
+Definition ap_op_poly (D : (R -> R) -> (R -> R)) (p : {poly R}) :=
   D (fun (x : R) => p.[x]).
 
-Notation "D # p" := (polyderiv D p) (at level 49).
+Notation "D # p" := (ap_op_poly D p) (at level 49).
 
 Definition scale_var (p : {poly R}):= \poly_(i < size p) (q ^ i * p`_i).
 
@@ -1491,13 +1491,16 @@ Proof.
   - by rewrite IH mulr0 subr0 exprSr.
 Qed.
 
-Theorem Gauss_binomial' a n : (forall n, qfact n != 0) ->
+Theorem Gauss_binomial a n : (forall n, qfact n != 0) ->
   qbinom_pos_poly (-a) n =
   \sum_(0 <= i < n.+1)
-    (qbicoef n i * q ^+ ((n - i) * (n - i - 1))./2
-                    * a ^+ (n - i)) *: 'X^i.
+    (qbicoef n i * q ^+ (i * (i - 1))./2 * a ^+ i) *: 'X^(n - i).
 Proof.
   move=> Hfact.
+  rewrite big_nat_rev //=.
+  under eq_big_nat => i /andP [_ Hi].
+    rewrite add0n subSS subKn // qbicoefE //.
+  over.
   rewrite (q_Taylorp n (qbinom_pos_poly (-a) n) 0) //; last by rewrite qbinom_size.
   under eq_big_nat => i /andP [_ Hi].
     rewrite hoDqp'_qbinom0 //.
@@ -1512,19 +1515,6 @@ Proof.
     rewrite mul_polyC qbinom_x0.
   over.
   done.
-Qed.
-
-Theorem Gauss_binomial a n : (forall n, qfact n != 0) ->
-  qbinom_pos_poly (-a) n =
-  \sum_(0 <= i < n.+1)
-    (qbicoef n i * q ^+ (i * (i - 1))./2 * a ^+ i) *: 'X^(n - i).
-Proof.
-  move=> Hfact.
-  rewrite big_nat_rev //=.
-  under eq_big_nat => i /andP [_ Hi].
-    rewrite add0n subSS subKn // qbicoefE //.
-  over.
-  by rewrite Gauss_binomial'.
 Qed.
 
 End q_analogue.
