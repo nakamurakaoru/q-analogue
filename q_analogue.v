@@ -12,7 +12,6 @@ Hypothesis Hq : q - 1 != 0.
 Notation "f ** g" := (fun x => f x * g x) (at level 40).
 Notation "f // g" := (fun x => f x / g x) (at level 40).
 Notation "a */ f" := (fun x => a * (f x)) (at level 40).
-
 (* q-differential *)
 Definition dq (f : R -> R) x := f (q * x) - f x.
 
@@ -864,17 +863,15 @@ Proof.
   have ithD : forall j, (j.+1 <= n)%N ->
     (D \^ j.+1) f = \sum_(j.+1 <= i < n.+1) c i *: P (i - j.+1)%N.
     move=> j Hj.
-    rewrite Hf linear_distr.
-      rewrite {1}(lock j.+1).
-      rewrite (@big_cat_nat _ _ _ j.+1) //=.
-        rewrite -lock.
-        under eq_big_nat => i /andP [_ Hi].
-          rewrite nthisfderiv_0 // scaler0.
-        over.
-        rewrite big1 // add0r.
-        by under eq_big_nat => i /andP [Hi _] do rewrite nthisfderiv_pos //.
-      by apply leqW.
-    by apply nth_islinear.
+    rewrite Hf linear_distr; last by apply nth_islinear.
+    rewrite {1}(lock j.+1).
+    rewrite (@big_cat_nat _ _ _ j.+1) //=; last by apply leqW.
+    rewrite -lock.
+    under eq_big_nat => i /andP [_ Hi].
+      rewrite nthisfderiv_0 // scaler0.
+    over.
+    rewrite big1 // add0r.
+    by under eq_big_nat => i /andP [Hi _] do rewrite nthisfderiv_pos //.
   have coef : forall j, (j <= n)%N -> c j = ((D \^ j) f).[a].
     move=> j Hj.
     destruct j => //.
@@ -888,7 +885,6 @@ Proof.
       case: (i - j.+1)%N => // k Hk.
       rewrite HP mulr0.
     over.
-    move=> /=.
     by rewrite big1 // addr0.
   rewrite {1}Hf big_nat_cond [RHS]big_nat_cond.
   apply eq_bigr => i /andP [/andP [Hi Hi'] _].
@@ -1108,8 +1104,9 @@ Proof. by rewrite dqpXE dvdpZl ?dqppXE ?dvdp_mulIl. Qed.
 Local Notation tofrac := (@tofrac [idomainType of {poly R}]).
 Local Notation "x %:F" := (tofrac x).
 
-Theorem Dq_f_ok_frac p : (dqp p)%:F / (dqp 'X)%:F = (Dqp p)%:F.
+Theorem Dqp_ok_frac p : (dqp p)%:F / (dqp 'X)%:F = (Dqp p)%:F.
 Proof.
+Locate tofrac_eq.
   have Hn0 : (dqp 'X)%:F != 0.
     rewrite tofrac_eq dqpXE lreg_polyZ_eq0 ?polyX_eq0 //.
     rewrite /(GRing.lreg) /(injective) => x y.
