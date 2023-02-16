@@ -1535,6 +1535,16 @@ Proof.
   done.
 Qed.
 
+Lemma Gauss_binomialf a n x : (forall n, qfact n != 0) ->
+  qbinom_pos (-a) n x =
+  \sum_(0 <= i < n.+1)
+    (qbicoef n i * q ^+ (i * (i - 1))./2 * a ^+ i) * x ^+ (n - i).
+Proof.
+  move=> Hfact.
+  rewrite qbinom_posE Gauss_binomial // hornersumD.
+  by under eq_big_nat do rewrite hornerZ hornerXn.
+Qed.
+
 End q_analogue.
 
 Section q_chain_rule.
